@@ -1,0 +1,48 @@
+REPORT z102_11_struc_itab_demo.
+
+" eigener, einfacher typ:
+TYPES: kontonr_typ(20) TYPE n.
+
+" Variable zu eigenem Typ:
+DATA: gn_kontonr TYPE kontonr_typ.
+
+" eigene Typen deklarieren:
+TYPES:
+BEGIN OF spielfigur_typ,
+  name(30) TYPE c,
+  gold(4) TYPE n,
+    END OF spielfigur_typ.
+
+" Strukturen definieren
+" Struktur wie Datenbank Zeile, auch namensgleich
+TABLES: z102_dy_karte. "struktur heisst wie tabelle und ist eine Zeile davon
+" Struktur wie DB-Tabelle, eigener Name
+DATA: wa TYPE z102_dy_karte. " wa steht für arbeitsbereich (workarea)
+" Struktur wie andere Struktur/Variable
+DATA: gs_karte LIKE wa.
+" Struktur: Komponenten selbst definiert
+DATA: BEGIN OF gs_person,
+  name(20) TYPE c,
+  telnr(10) TYPE n,
+    END OF gs_person.
+" Struktur wie (selbst definierter) typ
+DATA: gs_spielfigur TYPE spielfigur_typ.
+
+"interne Tabellen deklarieren:
+" interne Tabelle, Struktur wie dtab
+DATA: itab TYPE TABLE OF z102_dy_karte.
+" interne Tabelle, Struktur wie angegebene andere Struktur (variable)
+DATA: gt_personen LIKE TABLE OF gs_person.
+" interne Tabelle, Struktur wie angegebener Typ
+DATA: gt_spielfiguren type TABLE OF spielfigur_typ.
+" interne Tabelle wie andere itab (variable)
+DATA: gt_personen2 like gt_personen.
+
+"tabellentyp definieren:
+TYPES: spielfigur_ttyp TYPE TABLE OF spielfigur_typ.
+
+" itab von tabellentyp
+data: gt_spielfiguren2 TYPE spielfigur_ttyp.
+" zeile zu itab-variable
+data: gs_spielfigur2 LIKE LINE OF gt_spielfiguren2.
+

@@ -1,0 +1,97 @@
+REPORT z102_11_select_demo.
+
+
+
+" Variante 1: bulk select mit folgender loop
+
+DATA: BEGIN OF gs_flug_kurz,
+  carrid like spfli-carrid,
+  airpfrom like spfli-airpfrom,
+  airpto like spfli-airpto,
+  end of gs_flug_kurz.
+
+  DATA: gt_fluege_kurz like TABLE OF gs_flug_kurz.
+
+SELECT carrid airpfrom airpto
+  FROM spfli
+  INTO TABLE gt_fluege_kurz
+  WHERE carrid ='LH'
+  AND airpfrom = 'FRA'.
+
+  LOOP AT gt_fluege_kurz INTO gs_flug_kurz.
+    WRITE: / 'Zielflughafen ', gs_flug_kurz-airpto.
+  ENDLOOP.
+
+WRITE:/ '-------------------'.
+
+
+" Variante 2: mit select ... endselect
+
+  DATA: gt_flugverbindungen TYPE TABLE OF spfli.
+  DATA: gs_flugverbindung LIKE LINE OF gt_flugverbindungen.
+
+SELECT carrid airpfrom airpto
+FROM spfli
+INTO CORRESPONDING FIELDS OF gs_flugverbindung
+  WHERE carrid = 'LH'
+  AND airpfrom = 'FRA'.
+  WRITE:  / 'Fluggesellschaft: ', gs_flugverbindung-carrid,
+           'Startflughafen: ', gs_flugverbindung-airpfrom,
+           'Zielflughafen', gs_flugverbindung-airpto.
+  "append gs_flugverbindung to gt_flugverbindungen.
+ENDSELECT.
+
+
+REPORT z102_11_select_dem02.
+
+" Aufgabe 1:
+" Lösung ohne interne Tabelle:
+
+" Selektieren Sie cityfrom cityto planetype fldate aller Flüge aus, die von carrid='LH' sind.
+" sortiert nach Zielflughafen aufsteigend
+" (Lösung ohne interne Tabelle:)
+
+*DATA:
+*BEGIN OF gs_flugdaten,
+*  cityfrom LIKE spfli-cityfrom,
+*  cityto LIKE spfli-cityto,
+*  planetype LIKE sflight-planetype,
+*  fldate LIKE sflight-fldate,
+*END OF gs_flugdaten.
+*
+*SELECT cityfrom cityto planetype fldate
+*   FROM spfli as a
+*  join sflight as b
+*  on a~carrid = b~carrid
+*  INTO gs_flugdaten
+*WHERE a~carrid = 'LH'
+*  ORDER BY cityto ASCENDING.
+*  WRITE: / gs_flugdaten.
+*ENDSELECT.
+
+
+DATA:
+BEGIN OF gs_flugdaten,
+  cityfrom LIKE spfli-cityfrom,
+  cityto LIKE spfli-cityto,
+  planetype LIKE sflight-planetype,
+  fldate LIKE sflight-fldate,
+END OF gs_flugdaten.
+DATA: gt_flugdaten LIKE TABLE OF gs_flugdaten.
+
+SELECT cityfrom cityto planetype fldate
+   FROM spfli as a
+  join sflight as b
+  on a~carrid = b~carrid
+  AND a~connid = b~connid
+  INTO gs_flugdaten
+WHERE planetype = 'DC-10-10'
+  ORDER BY cityto ASCENDING.
+  APPEND gs_flugdaten to gt_flugdaten.
+ENDSELECT.
+
+LOOP AT gt_flugdaten into gs_flugdaten from 11 to 20. " from 21 to 44 wäre auch möglich
+  WRITE: / gs_flugdaten.
+ENDLOOP.
+
+WRITE: / 'Treffer: ', sy-dbcnt.
